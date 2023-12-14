@@ -3,9 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"github.com/go-resty/resty/v2"
 	"log"
-	"net/http"
 )
 
 type ResponseDto struct {
@@ -25,24 +24,16 @@ type User struct {
 }
 
 func main() {
-	request, err := http.NewRequest(http.MethodGet, "https://reqres.in/api/users", nil)
-	if err != nil {
-		log.Printf("failed to request: %v \n", err.Error())
-		return
-	}
-	client := http.Client{}
-	response, err := client.Do(request)
+
+	client := resty.New()
+	resp, err := client.R().Get("https://reqres.in/api/users")
 	if err != nil {
 		log.Printf("err response: %v \n", err.Error())
 		return
 	}
-	bodyByte, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Printf("err ReadAll: %v \n", err.Error())
-		return
-	}
+
 	var responseDto ResponseDto
-	err = json.Unmarshal(bodyByte, &responseDto)
+	err = json.Unmarshal(resp.Body(), &responseDto)
 	if err != nil {
 		log.Printf("err unmarshal: %v \n", err.Error())
 		return
